@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return 'page not found';
 });
 
 Route::group(['prefix' => 'dashboard', 'middleware' => 'auth'], function () {
