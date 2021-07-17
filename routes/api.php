@@ -22,6 +22,15 @@ Route::group(['prefix' => 'type'], function () {
     });
 });
 
+Route::group(['prefix' => 'country'], function () {
+    Route::get('/', 'CountryController@index');
+    Route::get('/{id}', 'CountryController@show');
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::post('/', 'CountryController@store');
+        Route::put('/{id}', 'CountryController@update');
+    });
+});
+
 Route::group(['prefix' => 'oauth'], function () {
     Route::post('login', 'AuthController@login');
     Route::post('register', 'AuthController@signup');
@@ -65,16 +74,4 @@ Route::group(['prefix' => 'user'], function () {
         Route::get('/', 'UserController@index');
         Route::delete('/{id}', 'UserController@destroy');
     });
-});
-
-Route::post('upload', function (Request $request) {
-    $request->validate([
-        'image' => ['file', 'max:4096', 'mimes:jpg'],
-    ]);
-    $storage = \Illuminate\Support\Facades\Storage::disk('gdrive');
-    $result = $storage->put(config('filesystems.gdrive.folder_id'), $request->file('image'));
-    return response()->json([
-       'code' => 200,
-       'data' => $result,
-    ]);
 });

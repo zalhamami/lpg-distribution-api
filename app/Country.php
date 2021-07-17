@@ -3,11 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Country extends Model
+class Country extends General
 {
     use HasFactory;
+
+    public $incrementing = false;
 
     protected $fillable = [
         'id',
