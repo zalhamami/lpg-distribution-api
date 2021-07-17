@@ -20,12 +20,15 @@ class DateTimeHelper
     /**
      * @param $date
      * @return string|null
-     * @throws \Exception
      */
     public static function convertDatetimeToIso($date)
     {
         if (!$date) return null;
-        $datetime = new DateTime($date);
-        return $datetime->format(DateTime::ATOM);
+        try {
+            $datetime = new DateTime($date);
+            return $datetime->format(DateTime::ATOM);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
