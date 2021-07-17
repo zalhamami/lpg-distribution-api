@@ -42,10 +42,10 @@ class AuthController extends ApiController
             return $this->errorResponse('These credentials do not match our records', 401);
         }
 
-        if (!$user->hasVerifiedEmail()) {
-            $user->sendEmailVerificationNotification();
-            return $this->errorResponse('Please verify your email first before login.', 400);
-        }
+//        if (!$user->hasVerifiedEmail()) {
+//            $user->sendEmailVerificationNotification();
+//            return $this->errorResponse('Please verify your email first before login.', 400);
+//        }
 
         $response = $this->createAccessToken($user);
         return $this->singleData($response);
