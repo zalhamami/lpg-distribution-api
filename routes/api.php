@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 Route::group(['prefix' => 'type'], function () {
     Route::get('/', 'TypeController@index');
     Route::get('/{id}', 'TypeController@show');
-    Route::group(['middleware' => 'auth:api'], function () {
+    Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
         Route::post('/', 'TypeController@store');
         Route::put('/{id}', 'TypeController@update');
     });
@@ -25,7 +25,7 @@ Route::group(['prefix' => 'type'], function () {
 Route::group(['prefix' => 'country'], function () {
     Route::get('/', 'CountryController@index');
     Route::get('/{id}', 'CountryController@show');
-    Route::group(['middleware' => 'auth:api'], function () {
+    Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
         Route::post('/', 'CountryController@store');
         Route::put('/{id}', 'CountryController@update');
     });
@@ -34,9 +34,20 @@ Route::group(['prefix' => 'country'], function () {
 Route::group(['prefix' => 'province'], function () {
     Route::get('/', 'ProvinceController@index');
     Route::get('/{id}', 'ProvinceController@show');
-    Route::group(['middleware' => 'auth:api'], function () {
+    Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
         Route::post('/', 'ProvinceController@store');
         Route::put('/{id}', 'ProvinceController@update');
+        Route::delete('/{id}', 'ProvinceController@destroy');
+    });
+});
+
+Route::group(['prefix' => 'city'], function () {
+    Route::get('/', 'CityController@index');
+    Route::get('/{id}', 'CityController@show');
+    Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
+        Route::post('/', 'CityController@store');
+        Route::put('/{id}', 'CityController@update');
+        Route::delete('/{id}', 'CityController@destroy');
     });
 });
 
