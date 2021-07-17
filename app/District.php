@@ -5,20 +5,19 @@ namespace App;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class City extends General
+class District extends General
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'province_id',
-        'iso_id',
         'name',
+        'city_id',
     ];
 
-    protected $with = ['province'];
+    protected $with = ['city'];
 
-    public function province()
+    public function city()
     {
-        return $this->belongsTo(Province::class)->without('country');
+        return $this->belongsTo(City::class)->without('province');
     }
 }

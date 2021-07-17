@@ -41,6 +41,16 @@ Route::group(['prefix' => 'province'], function () {
     });
 });
 
+Route::group(['prefix' => 'district'], function () {
+    Route::get('/', 'DistrictController@index');
+    Route::get('/{id}', 'DistrictController@show');
+    Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
+        Route::post('/', 'DistrictController@store');
+        Route::put('/{id}', 'DistrictController@update');
+        Route::delete('/{id}', 'DistrictController@destroy');
+    });
+});
+
 Route::group(['prefix' => 'city'], function () {
     Route::get('/', 'CityController@index');
     Route::get('/{id}', 'CityController@show');
