@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\SupplierRepository;
+use App\Repositories\AgentRepository;
 use Illuminate\Http\Request;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
-class SupplierController extends ApiController
+class AgentController extends ApiController
 {
     /**
-     * SupplierController constructor.
-     * @param SupplierRepository $repo
+     * AgentController constructor.
+     * @param AgentRepository $repo
      */
-    public function __construct(SupplierRepository $repo) {
+    public function __construct(AgentRepository $repo) {
         $this->repo = $repo;
     }
 
@@ -34,7 +34,9 @@ class SupplierController extends ApiController
             'name' => ['required', 'string'],
             'description' => ['required', 'string'],
             'contact' => ['required', 'phone:ID'],
-            'city_id' => ['required', 'integer', 'exists:cities,id,deleted_at,NULL'],
+            'open_hour' => ['required', 'date_format:H:i'],
+            'close_hour' => ['required', 'date_format:H:i'],
+            'supplier_id' => ['required', 'integer', 'exists:suppliers,id,deleted_at,NULL'],
         ]);
     }
 
@@ -77,20 +79,20 @@ class SupplierController extends ApiController
             'postal_code' => ['required', 'string'],
         ]);
 
-        $supplier = $this->repo->getById($id);
+        $agent = $this->repo->getById($id);
         $user = $request->user();
-        if (!$this->isOwner($supplier, $user)) {
+        if (!$this->isOwner($agent, $user)) {
             return $this->errorResponse('You are not allowed to update this resource', 403);
         }
 
-        if ($supplier->address) {
-            $supplier->address()->update($request->all());
+        if ($agent->address) {
+            $agent->address()->update($request->all());
         } else {
-            $supplier->address()->create($request->all());
+            $agent->address()->create($request->all());
         }
-        $supplier->refresh();
+        $agent->refresh();
 
-        return $this->singleData($supplier, 201);
+        return $this->singleData($agent, 201);
     }
 
     /**
@@ -112,9 +114,9 @@ class SupplierController extends ApiController
     {
         $this->requestValidation($request);
 
-        $supplier = $this->repo->getById($id);
+        $agent = $this->repo->getById($id);
         $user = $request->user();
-        if (!$this->isOwner($supplier, $user)) {
+        if (!$this->isOwner($agent, $user)) {
             return $this->errorResponse('You are not allowed to update this resource', 403);
         }
 

@@ -74,6 +74,20 @@ Route::group(['prefix' => 'supplier'], function () {
     });
 });
 
+Route::group(['prefix' => 'agent'], function () {
+    Route::get('/', 'AgentController@index');
+    Route::get('/{id}', 'AgentController@show');
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::post('/', 'AgentController@store');
+        Route::post('/{id}/address', 'AgentController@storeAddress');
+        Route::put('/{id}', 'AgentController@update');
+        Route::group(['middleware' => ['role:admin|supplier']], function () {
+            Route::delete('/{id}', 'AgentController@destroy');
+        });
+    });
+});
+
+
 Route::group(['prefix' => 'oauth'], function () {
     Route::post('login', 'AuthController@login');
     Route::post('register', 'AuthController@signup');
