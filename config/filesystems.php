@@ -72,6 +72,16 @@ return [
             'folder_id' => env('GOOGLE_DRIVE_FOLDER_ID'),
         ],
 
+        'gcs' => [
+            'driver' => 'gcs',
+            'project_id' => env('GOOGLE_CLOUD_PROJECT_ID'),
+            'key_file' => env('GOOGLE_CLOUD_KEY_FILE'),
+            'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET'),
+            'path_prefix' => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', null),
+            'storage_api_uri' => env('GOOGLE_CLOUD_STORAGE_PUBLIC_URL', null),
+            'visibility' => 'public', // optional: public|private
+        ],
+
     ],
 
 ];

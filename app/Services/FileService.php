@@ -20,7 +20,7 @@ class FileService {
      * @param string $storageType
      * @param bool $fromString
      */
-    public function __construct(string $storageType = 'local', bool $fromString = false)
+    public function __construct(string $storageType = 'default', bool $fromString = false)
     {
         $this->storage = new StorageService($storageType, $fromString);
         $this->fromString = $fromString;
