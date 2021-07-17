@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Product;
 use App\Repositories\SupplierRepository;
+use App\Stock;
 use Illuminate\Http\Request;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
@@ -59,6 +61,43 @@ class SupplierController extends ApiController
         $this->requestValidation($request);
         $payload = $this->getPayload($request);
         $response = $this->repo->create($payload);
+        return $this->singleData($response, 201);
+    }
+
+    /**
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeStock(Request $request, int $id)
+    {
+        $request->validate([
+            'product_id' => ['required', 'integer'],
+            'quantity' => ['required', 'integer'],
+        ]);
+
+        $supplier = $this->repo->getById($id);
+
+        $product = Product::findOrFail($request['product_id']);
+        if ($product->supplier_id !== $supplier->id) {
+            return $this->errorResponse('You are not allowed to access this resource', 403);
+        }
+
+        $existingStock = $supplier->stocks->filter(function ($item) use (&$request) {
+            return $item->product_id === $request['product_id'];
+        })->first();
+
+        if ($existingStock) {
+            $existingStock->quantity = $request['quantity'];
+            $existingStock->save();
+            return $this->singleData($existingStock);
+        }
+
+        $response = $supplier->stocks()->create([
+            'product_id' => $request['product_id'],
+            'quantity' => $request['quantity'],
+        ]);
+
         return $this->singleData($response, 201);
     }
 

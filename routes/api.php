@@ -67,6 +67,7 @@ Route::group(['prefix' => 'supplier'], function () {
     Route::group(['middleware' => ['auth:api']], function () {
         Route::post('/', 'SupplierController@store');
         Route::post('/{id}/address', 'SupplierController@storeAddress');
+        Route::post('/{id}/stock', 'SupplierController@storeStock');
         Route::put('/{id}', 'SupplierController@update');
         Route::group(['middleware' => ['role:admin']], function () {
             Route::delete('/{id}', 'SupplierController@destroy');
