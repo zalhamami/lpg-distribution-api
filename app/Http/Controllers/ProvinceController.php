@@ -64,4 +64,14 @@ class ProvinceController extends ApiController
         $this->requestValidation($request);
         return $this->repo->update($id, $request->all());
     }
+
+    /**
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(int $id)
+    {
+        $data = $this->repo->delete($id);
+        return $this->deleteMessage($data);
+    }
 }
