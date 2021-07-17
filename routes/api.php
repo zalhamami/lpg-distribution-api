@@ -87,6 +87,17 @@ Route::group(['prefix' => 'agent'], function () {
     });
 });
 
+Route::group(['prefix' => 'product'], function () {
+    Route::get('/', 'ProductController@index');
+    Route::get('/{id}', 'ProductController@show');
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::group(['middleware' => ['role:admin|supplier']], function () {
+            Route::post('/', 'ProductController@store');
+            Route::post('/{id}', 'ProductController@update');
+            Route::delete('/{id}', 'ProductController@destroy');
+        });
+    });
+});
 
 Route::group(['prefix' => 'oauth'], function () {
     Route::post('login', 'AuthController@login');
