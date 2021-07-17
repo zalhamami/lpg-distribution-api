@@ -33,4 +33,14 @@ class Supplier extends General
     {
         return $this->belongsTo(City::class);
     }
+
+    public function stocks()
+    {
+        return $this->morphMany(Stock::class, 'owner');
+    }
+
+    public function scopeDetails($query)
+    {
+        return $query->with(['stocks']);
+    }
 }

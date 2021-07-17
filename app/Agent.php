@@ -36,4 +36,14 @@ class Agent extends General
     {
         return $this->morphOne(Address::class, 'addressable');
     }
+
+    public function stocks()
+    {
+        return $this->morphMany(Stock::class, 'owner');
+    }
+
+    public function scopeDetails($query)
+    {
+        return $query->with(['stocks']);
+    }
 }
