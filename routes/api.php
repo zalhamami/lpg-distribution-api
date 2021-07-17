@@ -61,6 +61,19 @@ Route::group(['prefix' => 'city'], function () {
     });
 });
 
+Route::group(['prefix' => 'supplier'], function () {
+    Route::get('/', 'SupplierController@index');
+    Route::get('/{id}', 'SupplierController@show');
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::post('/', 'SupplierController@store');
+        Route::post('/{id}/address', 'SupplierController@storeAddress');
+        Route::put('/{id}', 'SupplierController@update');
+        Route::group(['middleware' => ['role:admin']], function () {
+            Route::delete('/{id}', 'SupplierController@destroy');
+        });
+    });
+});
+
 Route::group(['prefix' => 'oauth'], function () {
     Route::post('login', 'AuthController@login');
     Route::post('register', 'AuthController@signup');

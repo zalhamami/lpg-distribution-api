@@ -7,7 +7,7 @@ use App\City;
 class CityRepository extends Repository
 {
     /**
-     * CountryRepository constructor.
+     * CityRepository constructor.
      * @param City $model
      */
     public function __construct(City $model)

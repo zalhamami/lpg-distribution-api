@@ -16,6 +16,7 @@
         "laravel/passport": "^10.0",
         "laravel/tinker": "^2.0",
         "laravel/ui": "^3.3",
+        "propaganistas/laravel-phone": "^4.3",
         "sentry/sentry-laravel": "^2.2",
         "spatie/laravel-permission": "^4.1"
     },
