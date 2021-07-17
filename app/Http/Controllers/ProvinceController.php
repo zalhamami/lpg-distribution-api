@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\CountryRepository;
+use App\Repositories\ProvinceRepository;
 use Illuminate\Http\Request;
 
-class CountryController extends ApiController
+class ProvinceController extends ApiController
 {
     /**
-     * CountryController constructor.
-     * @param CountryRepository $repo
+     * ProvinceController constructor.
+     * @param ProvinceRepository $repo
      */
-    public function __construct(CountryRepository $repo) {
+    public function __construct(ProvinceRepository $repo) {
         $this->repo = $repo;
     }
 
@@ -27,8 +27,11 @@ class CountryController extends ApiController
     private function requestValidation(Request $request)
     {
         $request->validate([
-            'id' => ['required', 'string', 'max:3'],
+            'state_id' => ['nullable', 'integer'],
+            'country_id' => ['required', 'string', 'max:3', 'exists:countries,id'],
+            'iso_id' => ['nullable', 'integer'],
             'name' => ['required', 'string'],
+            'timezone' => ['nullable', 'timezone'],
         ]);
     }
 
@@ -39,9 +42,6 @@ class CountryController extends ApiController
     public function store(Request $request)
     {
         $this->requestValidation($request);
-        $request->validate([
-            'id' => 'unique:countries'
-        ]);
         return $this->repo->create($request->all());
     }
 

@@ -31,6 +31,15 @@ Route::group(['prefix' => 'country'], function () {
     });
 });
 
+Route::group(['prefix' => 'province'], function () {
+    Route::get('/', 'ProvinceController@index');
+    Route::get('/{id}', 'ProvinceController@show');
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::post('/', 'ProvinceController@store');
+        Route::put('/{id}', 'ProvinceController@update');
+    });
+});
+
 Route::group(['prefix' => 'oauth'], function () {
     Route::post('login', 'AuthController@login');
     Route::post('register', 'AuthController@signup');
