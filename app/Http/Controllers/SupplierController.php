@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Agent;
+use App\Order;
+use App\OrderStatus;
 use App\Product;
 use App\Repositories\SupplierRepository;
-use App\Stock;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 class SupplierController extends ApiController
@@ -130,6 +134,80 @@ class SupplierController extends ApiController
         $supplier->refresh();
 
         return $this->singleData($supplier, 201);
+    }
+
+    public function order(Request $request, int $id)
+    {
+        $request->validate([
+            'products' => ['required', 'array'],
+            'products.*.id' => ['required', 'integer'],
+            'products.*.quantity' => ['required', 'integer'],
+        ]);
+
+        $user = $request->user();
+        $agent = Agent::where('user_id', $user->id)->firstOrFail();
+        $supplier = $this->repo->getById($id);
+
+        $purchases = [];
+        $totalPrice = 0;
+        foreach ($request['products'] as $item) {
+            $product = Product::find($item['id']);
+            if (!$product) {
+                continue;
+            }
+
+            $stock = $supplier->stocks->filter(function ($item) use (&$product) {
+                return $item->product_id === $product->id;
+            })->first();
+
+            if (!$stock || ($stock && $stock->quantity < $item['quantity'])) {
+                return $this->errorResponse("Product stock insufficient for id {$product->id}", 400);
+            }
+
+            array_push($purchases, [
+                'data' => $product,
+                'quantity' => $item['quantity'],
+            ]);
+            $totalPrice += $product->price;
+        }
+
+        $data = [
+            'buyer_id' => $agent->id,
+            'buyer_type' => 'App\\Agent',
+            'seller_id' => $supplier->id,
+            'seller_type' => 'App\\Supplier',
+            'total_price' => $totalPrice,
+            'tax' => 0,
+            'ordered_at' => Carbon::now(),
+            'expired_at' => Carbon::now()->addDay(),
+        ];
+        $order = DB::transaction(function () use (&$data, &$purchases, &$supplier) {
+            $order = Order::create($data);
+
+            foreach ($purchases as $purchase) {
+                $order->items()->create([
+                    'product_id' => $purchase['data']->id,
+                    'product_name' => $purchase['data']->name,
+                    'product_price' => $purchase['data']->price,
+                    'quantity' => $purchase['quantity'],
+                ]);
+
+                $stock = $supplier->stocks->filter(function ($item) use (&$purchase) {
+                    return $item->product_id === $purchase['data']->id;
+                })->first();
+                $stock->quantity -= $purchase['quantity'];
+                $stock->save();
+            }
+
+            $order->status()->create([
+                'status' => OrderStatus::CREATED,
+            ]);
+
+            return $order;
+        });
+        $order->refresh();
+
+        return $this->singleData($order, 201);
     }
 
     /**

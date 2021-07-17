@@ -39,6 +39,11 @@ class Supplier extends General
         return $this->morphMany(Stock::class, 'owner');
     }
 
+    public function orders()
+    {
+        return $this->morphMany(Order::class, 'seller');
+    }
+
     public function scopeDetails($query)
     {
         return $query->with(['stocks']);

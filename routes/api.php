@@ -69,6 +69,9 @@ Route::group(['prefix' => 'supplier'], function () {
         Route::post('/{id}/address', 'SupplierController@storeAddress');
         Route::post('/{id}/stock', 'SupplierController@storeStock');
         Route::put('/{id}', 'SupplierController@update');
+        Route::group(['middleware' => ['role:agent']], function () {
+            Route::post('/{id}/order', 'SupplierController@order');
+        });
         Route::group(['middleware' => ['role:admin']], function () {
             Route::delete('/{id}', 'SupplierController@destroy');
         });
@@ -97,6 +100,14 @@ Route::group(['prefix' => 'product'], function () {
             Route::post('/{id}', 'ProductController@update');
             Route::delete('/{id}', 'ProductController@destroy');
         });
+    });
+});
+
+Route::group(['prefix' => 'order'], function () {
+    Route::get('/', 'OrderController@index');
+    Route::get('/{id}', 'OrderController@show');
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::post('/{id}/status', 'OrderController@storeStatus');
     });
 });
 
@@ -133,6 +144,7 @@ Route::group(['prefix' => 'email/verify'], function () {
 Route::group(['prefix' => 'me', 'middleware' => 'auth:api'], function () {
     Route::get('user', 'UserController@showMyData');
     Route::put('user', 'UserController@updateMyData');
+    Route::get('order', 'OrderController@showMyOrders');
     Route::post('user/password/create', 'UserController@createPassword');
     Route::post('user/password/change', 'UserController@changePassword');
 });

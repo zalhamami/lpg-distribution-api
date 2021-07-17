@@ -20,7 +20,7 @@ class Agent extends General
         'supplier_id',
     ];
 
-    protected $with = ['address', 'supplier'];
+    protected $with = ['address'];
 
     public function user()
     {
@@ -42,8 +42,13 @@ class Agent extends General
         return $this->morphMany(Stock::class, 'owner');
     }
 
+    public function orders()
+    {
+        return $this->morphMany(Order::class, 'buyer');
+    }
+
     public function scopeDetails($query)
     {
-        return $query->with(['stocks']);
+        return $query->with(['supplier', 'stocks']);
     }
 }
