@@ -19,8 +19,12 @@ class AgentController extends ApiController
     /**
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        $request->validate([
+            'city_id' => ['nullable', 'integer'],
+            'district_id' => ['nullable', 'integer'],
+        ]);
         $data = $this->repo->getAll();
         return $this->collectionData($data);
     }
