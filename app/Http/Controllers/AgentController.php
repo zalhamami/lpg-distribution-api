@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\City;
 use App\Repositories\AgentRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Propaganistas\LaravelPhone\PhoneNumber;
+use Symfony\Component\HttpClient\HttpClient;
 
 class AgentController extends ApiController
 {
@@ -27,6 +30,35 @@ class AgentController extends ApiController
         ]);
         $data = $this->repo->getAll();
         return $this->collectionData($data);
+    }
+
+    public function showNearMe(Request $request)
+    {
+        $request->validate([
+            'latitude' => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
+        ]);
+
+        $mapsApiKey = env('MAPS_API_KEY');
+        $geoRequestUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+
+        $http = Http::get("{$geoRequestUrl}?latlng={$request['latitude']},{$request['longitude']}&key={$mapsApiKey}");
+        $geo = $http->json();
+
+        $result = $geo['results'][0];
+        $city = null;
+        foreach ($result['address_components'] as $component) {
+            if (in_array('administrative_area_level_2', $component['types'])) {
+                $city = $component;
+            }
+        }
+        if (!$city) {
+            return $this->errorResponse('Parameter not found', 404);
+        }
+
+        $city = City::where('name', 'like', "%{$city['long_name']}%")->firstOrFail();
+        $response = $this->repo->getALlNearMe($city->id);
+        return $this->collectionData($response);
     }
 
     /**

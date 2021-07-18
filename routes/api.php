@@ -117,6 +117,10 @@ Route::group(['prefix' => 'order'], function () {
     });
 });
 
+Route::group(['prefix' => 'near-me'], function () {
+    Route::get('agent', 'AgentController@showNearMe');
+});
+
 Route::group(['prefix' => 'oauth'], function () {
     Route::post('login', 'AuthController@login');
     Route::post('register', 'AuthController@signup');

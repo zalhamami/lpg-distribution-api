@@ -30,4 +30,12 @@ class AgentRepository extends Repository
         }
         return parent::getAll($query);
     }
+
+    public function getALlNearMe(int $cityId)
+    {
+        $query = $this->model->whereHas('address.district', function ($district) use (&$cityId) {
+            $district->where('city_id', $cityId);
+        });
+        return $this->getAll($query);
+    }
 }
