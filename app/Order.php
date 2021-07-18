@@ -47,9 +47,14 @@ class Order extends General
         return $this->hasOne(OrderStatus::class)->orderByDesc('id');
     }
 
+    public function payment()
+    {
+        return $this->hasOne(OrderPayment::class)->orderByDesc('id');
+    }
+
     public function scopeDetails($query)
     {
-        return $query->with(['items']);
+        return $query->with(['items', 'payment']);
     }
 
     public function getOrderedAtAttribute($value)

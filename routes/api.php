@@ -108,6 +108,12 @@ Route::group(['prefix' => 'order'], function () {
     Route::get('/{id}', 'OrderController@show');
     Route::group(['middleware' => ['auth:api']], function () {
         Route::post('/{id}/status', 'OrderController@storeStatus');
+        Route::group(['middleware' => ['role:agent']], function () {
+            Route::post('/{id}/payment', 'OrderController@storePayment');
+        });
+        Route::group(['middleware' => ['role:supplier']], function () {
+            Route::post('/{id}/payment/verify', 'OrderController@verifyPayment');
+        });
     });
 });
 
