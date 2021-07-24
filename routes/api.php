@@ -65,7 +65,6 @@ Route::group(['prefix' => 'supplier'], function () {
     Route::get('/', 'SupplierController@index');
     Route::get('/{id}', 'SupplierController@show');
     Route::group(['middleware' => ['auth:api']], function () {
-        Route::post('/', 'SupplierController@store');
         Route::post('/{id}/address', 'SupplierController@storeAddress');
         Route::post('/{id}/stock', 'SupplierController@storeStock');
         Route::put('/{id}', 'SupplierController@update');
@@ -73,6 +72,7 @@ Route::group(['prefix' => 'supplier'], function () {
             Route::post('/{id}/order', 'SupplierController@order');
         });
         Route::group(['middleware' => ['role:admin']], function () {
+            Route::post('/', 'SupplierController@store');
             Route::delete('/{id}', 'SupplierController@destroy');
         });
     });
@@ -82,10 +82,10 @@ Route::group(['prefix' => 'agent'], function () {
     Route::get('/', 'AgentController@index');
     Route::get('/{id}', 'AgentController@show');
     Route::group(['middleware' => ['auth:api']], function () {
-        Route::post('/', 'AgentController@store');
         Route::post('/{id}/address', 'AgentController@storeAddress');
         Route::put('/{id}', 'AgentController@update');
         Route::group(['middleware' => ['role:admin|supplier']], function () {
+            Route::post('/', 'AgentController@store');
             Route::delete('/{id}', 'AgentController@destroy');
         });
     });

@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\City;
 use App\Repositories\AgentRepository;
+use App\Repositories\UserRepository;
+use App\Role;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Symfony\Component\HttpClient\HttpClient;
@@ -12,11 +15,18 @@ use Symfony\Component\HttpClient\HttpClient;
 class AgentController extends ApiController
 {
     /**
+     * @var UserRepository
+     */
+    private $userRepo;
+
+    /**
      * AgentController constructor.
      * @param AgentRepository $repo
+     * @param UserRepository $userRepo
      */
-    public function __construct(AgentRepository $repo) {
+    public function __construct(AgentRepository $repo, UserRepository $userRepo) {
         $this->repo = $repo;
+        $this->userRepo = $userRepo;
     }
 
     /**
@@ -83,8 +93,13 @@ class AgentController extends ApiController
     private function getPayload(Request $request)
     {
         $data = $request->all();
-        $data['user_id'] = $request->user()->id;
         $data['contact'] = PhoneNumber::make($request['contact'], 'ID')->formatE164();
+        if ($request['email']) {
+            $data['email'] = $request['email'];
+        }
+        if ($request['password']) {
+            $data['password'] = $request['password'];
+        }
         return $data;
     }
 
@@ -95,9 +110,26 @@ class AgentController extends ApiController
     public function store(Request $request)
     {
         $this->requestValidation($request);
+        $request->validate([
+            'email' => ['required', 'email', 'unique:users'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        // Create user for agent
+        $user = $this->userRepo->create([
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'password' => Hash::make($request['password']),
+        ]);
+        $user->assignRole([Role::USER, Role::AGENT]);
+
+        // Create agent
         $payload = $this->getPayload($request);
-        $response = $this->repo->create($payload);
-        return $this->singleData($response, 201);
+        $payload['user_id'] = $user->id;
+
+        $agent = $this->repo->create($payload);
+        $agent = $this->repo->getById($agent->id);
+        return $this->singleData($agent, 201);
     }
 
     /**
@@ -157,6 +189,9 @@ class AgentController extends ApiController
         }
 
         $payload = $this->getPayload($request);
+        if ($agent->user_id) {
+            $payload['user_id'] = $agent->user_id;
+        }
         $response = $this->repo->update($id, $payload);
 
         return $this->singleData($response);

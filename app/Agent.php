@@ -20,7 +20,7 @@ class Agent extends General
         'supplier_id',
     ];
 
-    protected $with = ['address'];
+    protected $with = ['address', 'user'];
 
     public function user()
     {

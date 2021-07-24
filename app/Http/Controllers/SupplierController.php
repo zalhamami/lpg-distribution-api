@@ -7,19 +7,29 @@ use App\Order;
 use App\OrderStatus;
 use App\Product;
 use App\Repositories\SupplierRepository;
+use App\Repositories\UserRepository;
+use App\Role;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 class SupplierController extends ApiController
 {
     /**
+     * @var UserRepository
+     */
+    private $userRepo;
+
+    /**
      * SupplierController constructor.
      * @param SupplierRepository $repo
+     * @param UserRepository $userRepo
      */
-    public function __construct(SupplierRepository $repo) {
+    public function __construct(SupplierRepository $repo, UserRepository $userRepo) {
         $this->repo = $repo;
+        $this->userRepo = $userRepo;
     }
 
     /**
@@ -51,7 +61,6 @@ class SupplierController extends ApiController
     private function getPayload(Request $request)
     {
         $data = $request->all();
-        $data['user_id'] = $request->user()->id;
         $data['contact'] = PhoneNumber::make($request['contact'], 'ID')->formatE164();
         return $data;
     }
@@ -63,9 +72,27 @@ class SupplierController extends ApiController
     public function store(Request $request)
     {
         $this->requestValidation($request);
+        $request->validate([
+            'email' => ['required', 'email', 'unique:users'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        // Create user for supplier
+        $user = $this->userRepo->create([
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'password' => Hash::make($request['password']),
+        ]);
+        $user->assignRole([Role::USER, Role::SUPPLIER]);
+
+        // Create supplier
         $payload = $this->getPayload($request);
-        $response = $this->repo->create($payload);
-        return $this->singleData($response, 201);
+        $payload['user_id'] = $user->id;
+
+        $supplier = $this->repo->create($payload);
+        $supplier = $this->repo->getById($supplier->id);
+
+        return $this->singleData($supplier, 201);
     }
 
     /**
@@ -136,6 +163,11 @@ class SupplierController extends ApiController
         return $this->singleData($supplier, 201);
     }
 
+    /**
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function order(Request $request, int $id)
     {
         $request->validate([
@@ -236,6 +268,9 @@ class SupplierController extends ApiController
         }
 
         $payload = $this->getPayload($request);
+        if ($supplier->user_id) {
+            $payload['user_id'] = $supplier->user_id;
+        }
         $response = $this->repo->update($id, $payload);
 
         return $this->singleData($response);
