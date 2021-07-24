@@ -141,7 +141,7 @@ class SupplierController extends ApiController
     {
         $request->validate([
             'address' => ['required', 'string'],
-            'district_id' => ['required', 'integer', 'exists:districts,id'],
+            'district_id' => ['nullable', 'integer', 'exists:districts,id'],
             'latitude' => ['nullable', 'numeric'],
             'longitude' => ['nullable', 'numeric'],
             'postal_code' => ['required', 'string'],
